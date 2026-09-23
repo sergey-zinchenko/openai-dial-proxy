@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Public image. Base from Docker Hub, packages from Debian and PyPI.
 # No private registry and no build secrets.
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 LABEL org.opencontainers.image.title="openai-dial-proxy" \
       org.opencontainers.image.description="OpenAI-compatible proxy in front of AI DIAL Core" \
