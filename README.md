@@ -4,9 +4,9 @@ OpenAI-compatible HTTP in front of [AI DIAL Core](https://github.com/epam/ai-dia
 
 Apache-2.0. Independent project. Not an EPAM product.
 
-Image: `ghcr.io/sergey-zinchenko/openai-dial-proxy`
+Image: `ghcr.io/sergey-zinchenko/openai-dial-proxy:0.1.0` (`latest` is the same build).
 
-The GitHub repository and the GHCR package are private for now. Pulling the image needs a registry secret until the package is made public. After that, delete `image.pullSecrets` from the values file you use.
+The repository is public. While the GHCR package is still private, pulling the image needs a registry secret. After the package is public, delete `image.pullSecrets` from the values file you use.
 
 ## What it maps
 
@@ -104,10 +104,10 @@ Confirm the Gateway implementation accepts `HTTPRoute.spec.rules[].timeouts`. If
 | `REQUEST_TIMEOUT` | Upstream timeout in seconds. Match it to the edge timeout. |
 | `networkPolicy.allowExternalEgress: true` | So the proxy can reach Core. Tighten this if a namespace policy already allows that traffic. |
 
-After the image workflow is green, pin `image.digest` (it overrides `tag`):
+After the `v0.1.0` workflow is green, pin `image.digest` (it overrides `tag`):
 
 ```bash
-docker buildx imagetools inspect ghcr.io/sergey-zinchenko/openai-dial-proxy:latest
+docker buildx imagetools inspect ghcr.io/sergey-zinchenko/openai-dial-proxy:0.1.0
 ```
 
 ## Client
@@ -135,4 +135,4 @@ Runtime third-party notices are in [`NOTICE`](NOTICE). `scripts/check_licenses.p
 
 ## Image build
 
-GitHub Actions builds `python:3.12-slim` from Docker Hub and installs from PyPI. Nothing in the Dockerfile talks to a private registry. The workflow pushes to GHCR with `GITHUB_TOKEN` on `main` and on `v*` tags, then runs Trivy (fail on unfixed HIGH and CRITICAL) and uploads an SPDX SBOM.
+GitHub Actions builds `python:3.14-slim` from Docker Hub and installs from PyPI. Nothing in the Dockerfile talks to a private registry. A git tag `v0.1.0` publishes `ghcr.io/sergey-zinchenko/openai-dial-proxy:0.1.0` and `:latest`. The workflow then runs Trivy (fail on unfixed HIGH and CRITICAL) and uploads an SPDX SBOM.

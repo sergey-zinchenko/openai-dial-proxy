@@ -2,7 +2,6 @@ name: image
 
 on:
   push:
-    branches: [main]
     tags: ["v*"]
 
 permissions:
@@ -28,9 +27,8 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=
             type=semver,pattern={{version}}
+            type=raw,value=latest
 
       - id: build
         uses: docker/build-push-action@v7

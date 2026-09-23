@@ -1,14 +1,14 @@
 # dial-extension 3.1.1 — Ingress (networking.k8s.io/v1).
 # Do not enable httpRoute in the same release.
-# The chart default path is Prefix "/". That steals DIAL Core routes.
-# Keep Exact paths only: /v1/chat/completions, /v1/embeddings, /v1/models.
+# Exact paths only: /v1/chat/completions, /v1/embeddings, /v1/models.
+# Core keeps every other route on this host.
 
 image:
   registry: ghcr.io
   repository: sergey-zinchenko/openai-dial-proxy
-  tag: latest
-  # After the first green publish, pin the digest (it overrides tag):
-  # docker buildx imagetools inspect ghcr.io/sergey-zinchenko/openai-dial-proxy:latest
+  tag: "0.1.0"
+  # Pin the digest once the v0.1.0 workflow is green (digest overrides tag):
+  # docker buildx imagetools inspect ghcr.io/sergey-zinchenko/openai-dial-proxy:0.1.0
   pullPolicy: IfNotPresent
   # Required while the GHCR package is private. Remove after you make it public.
   pullSecrets:
