@@ -104,11 +104,7 @@ Confirm the Gateway implementation accepts `HTTPRoute.spec.rules[].timeouts`. If
 | `REQUEST_TIMEOUT` | Upstream timeout in seconds. Match it to the edge timeout. |
 | `networkPolicy.allowExternalEgress: true` | So the proxy can reach Core. Tighten this if a namespace policy already allows that traffic. |
 
-After the `v0.1.0` workflow is green, pin `image.digest` (it overrides `tag`):
-
-```bash
-docker buildx imagetools inspect ghcr.io/sergey-zinchenko/openai-dial-proxy:0.1.0
-```
+`image.digest` in the values files is `sha256:16a4fa74172ee742dd3ea8d1b5be412988495e73a68d70c4c7889792b903b4ad`. It overrides `tag`.
 
 ## Client
 

@@ -6,8 +6,7 @@ image:
   registry: ghcr.io
   repository: sergey-zinchenko/openai-dial-proxy
   tag: "0.1.0"
-  # Pin the digest once the v0.1.0 workflow is green (digest overrides tag):
-  # docker buildx imagetools inspect ghcr.io/sergey-zinchenko/openai-dial-proxy:0.1.0
+  digest: sha256:16a4fa74172ee742dd3ea8d1b5be412988495e73a68d70c4c7889792b903b4ad
   pullPolicy: IfNotPresent
   # Required while the GHCR package is private. Remove after you make it public.
   pullSecrets:
