@@ -1,0 +1,105 @@
+# dial-extension 3.1.1 — Gateway API HTTPRoute.
+# Do not enable ingress in the same release.
+# Empty httpRoute.rules renders PathPrefix "/". That steals DIAL Core routes.
+# Keep Exact matches only.
+
+image:
+  registry: ghcr.io
+  repository: sergey-zinchenko/openai-dial-proxy
+  tag: latest
+  # After the first green publish, pin the digest (it overrides tag):
+  # docker buildx imagetools inspect ghcr.io/sergey-zinchenko/openai-dial-proxy:latest
+  pullPolicy: IfNotPresent
+  # Required while the GHCR package is private. Remove after you make it public.
+  pullSecrets:
+    - ghcr-pull
+
+fullnameOverride: openai-dial-proxy
+
+containerPorts:
+  http: 8080
+
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+
+temporary:
+  mountPath: /tmp
+  sizeLimit: 64Mi
+
+env:
+  TMPDIR: /tmp
+  DIAL_UPSTREAM: "http://dial-core.dial.svc.cluster.local"
+  DEFAULT_API_VERSION: "2024-10-21"
+  REQUEST_TIMEOUT: "900"
+  MODELS_UPSTREAM_PATH: "/openai/models"
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+networkPolicy:
+  enabled: true
+  allowExternal: true
+  allowExternalEgress: true
+
+ingress:
+  enabled: false
+
+httpRoute:
+  enabled: true
+  hostnames:
+    - dial.example.com
+  parentRefs:
+    - name: public
+      namespace: gateway
+      sectionName: https
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /v1/chat/completions
+      timeouts:
+        request: 900s
+      backendRefs:
+        - name: openai-dial-proxy
+          port: 80
+    - matches:
+        - path:
+            type: Exact
+            value: /v1/embeddings
+      timeouts:
+        request: 900s
+      backendRefs:
+        - name: openai-dial-proxy
+          port: 80
+    - matches:
+        - path:
+            type: Exact
+            value: /v1/models
+      backendRefs:
+        - name: openai-dial-proxy
+          port: 80

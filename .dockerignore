@@ -1,0 +1,9 @@
+.git
+.github
+.venv
+.venv-lic
+**/__pycache__
+.pytest_cache
+.ruff_cache
+*.md
+!README.md

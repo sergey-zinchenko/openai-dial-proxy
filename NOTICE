@@ -1,0 +1,79 @@
+openai-dial-proxy
+Copyright 2026 Sergey Zinchenko
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this work except in compliance with the License.
+You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+----------------------------------------------------------------------
+
+Third-party attribution
+=======================
+
+This proxy speaks to AI DIAL Core, an open-source agentic AI orchestration
+platform developed and maintained by EPAM Systems, Inc. The upstream project
+is distributed under the Apache License 2.0 at:
+
+ https://github.com/epam/ai-dial-core
+
+Deployment examples use the dial-extension Helm chart, also Apache-2.0:
+
+ https://github.com/epam/ai-dial-helm
+
+"DIAL" and "AI DIAL" are trademarks of EPAM Systems, Inc. They are used
+here solely to indicate compatibility. This project is independent. It is
+not an official EPAM product and it is not affiliated with, sponsored by,
+or endorsed by EPAM Systems, Inc.
+
+The Apache License 2.0 does not grant trademark rights (see Section 6).
+
+----------------------------------------------------------------------
+
+Python packages shipped in the container image
+==============================================
+
+Versions below are the pins in requirements.txt plus the transitive
+packages those pins install. CI fails if the installed set drifts from
+this list. Licenses are OSI-approved.
+
+anyio 4.15.1
+  License: MIT
+  https://anyio.readthedocs.io/
+
+certifi 2026.7.22
+  License: Mozilla Public License 2.0 (MPL 2.0)
+  https://github.com/certifi/python-certifi
+
+click 8.5.0
+  License: BSD-3-Clause
+  https://github.com/pallets/click/
+
+h11 0.16.0
+  License: MIT
+  https://github.com/python-hyper/h11
+
+httpcore 1.0.9
+  License: BSD-3-Clause
+  https://www.encode.io/httpcore/
+
+httpx 0.28.1
+  License: BSD-3-Clause
+  https://github.com/encode/httpx
+
+idna 3.20
+  License: BSD-3-Clause
+  https://github.com/kjd/idna
+
+starlette 1.6.0
+  License: BSD-3-Clause
+  https://github.com/Kludex/starlette
+
+typing_extensions 4.16.0
+  License: PSF-2.0
+  https://github.com/python/typing_extensions
+
+uvicorn 0.52.4
+  License: BSD-3-Clause
+  https://uvicorn.dev/

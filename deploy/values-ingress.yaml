@@ -1,0 +1,103 @@
+# dial-extension 3.1.1 — Ingress (networking.k8s.io/v1).
+# Do not enable httpRoute in the same release.
+# The chart default path is Prefix "/". That steals DIAL Core routes.
+# Keep Exact paths only: /v1/chat/completions, /v1/embeddings, /v1/models.
+
+image:
+  registry: ghcr.io
+  repository: sergey-zinchenko/openai-dial-proxy
+  tag: latest
+  # After the first green publish, pin the digest (it overrides tag):
+  # docker buildx imagetools inspect ghcr.io/sergey-zinchenko/openai-dial-proxy:latest
+  pullPolicy: IfNotPresent
+  # Required while the GHCR package is private. Remove after you make it public.
+  pullSecrets:
+    - ghcr-pull
+
+fullnameOverride: openai-dial-proxy
+
+containerPorts:
+  http: 8080
+
+containerSecurityContext:
+  readOnlyRootFilesystem: true
+
+temporary:
+  mountPath: /tmp
+  sizeLimit: 64Mi
+
+env:
+  TMPDIR: /tmp
+  DIAL_UPSTREAM: "http://dial-core.dial.svc.cluster.local"
+  DEFAULT_API_VERSION: "2024-10-21"
+  REQUEST_TIMEOUT: "900"
+  MODELS_UPSTREAM_PATH: "/openai/models"
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+networkPolicy:
+  enabled: true
+  allowExternal: true
+  allowExternalEgress: true
+
+httpRoute:
+  enabled: false
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  pathType: Exact
+  path: /v1/chat/completions
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "512m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+  hosts:
+    - dial.example.com
+  tls:
+    - hosts:
+        - dial.example.com
+      secretName: dial-tls
+  extraPaths:
+    - path: /v1/embeddings
+      pathType: Exact
+      backend:
+        service:
+          name: openai-dial-proxy
+          port:
+            number: 80
+    - path: /v1/models
+      pathType: Exact
+      backend:
+        service:
+          name: openai-dial-proxy
+          port:
+            number: 80
