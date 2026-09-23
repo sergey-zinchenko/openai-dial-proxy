@@ -20,7 +20,7 @@ The GitHub repository and the GHCR package are private for now. Pulling the imag
 
 Auth: `Api-Key` is forwarded as `Api-Key`. A JWT `Authorization: Bearer` stays `Authorization`. Any other bearer token is sent as `Api-Key`. Do not put a DIAL key in Helm values. The client sends its own key.
 
-Provider prefixes on the model id (`openai/`, `azure/`, `litellm/`, `dial/`) are stripped only on the upstream path. The JSON body is forwarded as received, except lone UTF-16 surrogates (a truncated emoji) which are replaced with U+FFFD so downstream Python services can encode UTF-8. A clean body is forwarded byte-identical.
+The JSON body is forwarded as received, except lone UTF-16 surrogates (a truncated emoji) which are replaced with U+FFFD so downstream Python services can encode UTF-8. A clean body is forwarded byte-identical.
 
 httpx decodes gzip from Core. The proxy drops `content-encoding` and `content-length` so the client does not gunzip plaintext.
 
@@ -35,7 +35,13 @@ That chart already has both:
 - `ingress` (`networking.k8s.io/v1`)
 - `httpRoute` (Gateway API, since chart 3.1.0)
 
-Use one. The chart default for both is a prefix of `/`. That would steal Core routes such as `/v1/ops`, `/v1/applications`, and `/v1/toolsets`. The examples pin **Exact** matches for the three paths above.
+Use either Ingress or an HTTPRoute. Publish only these three paths, each as an Exact match:
+
+- `/v1/chat/completions`
+- `/v1/embeddings`
+- `/v1/models`
+
+Core stays on this host for every other API, including `/v1/ops`, `/v1/applications`, and `/v1/toolsets`. The chart default is a prefix of `/`. The examples override that so the proxy does not sit in front of Core.
 
 ```bash
 helm repo add dial https://charts.dialx.ai
@@ -76,7 +82,7 @@ Long completions need a long proxy read timeout. The example sets nginx `proxy-r
 
 [`deploy/values-httproute.yaml`](deploy/values-httproute.yaml). Set `httpRoute.parentRefs` to your Gateway (name, namespace, listener `sectionName`). The placeholder is `public` / `gateway` / `https`.
 
-Empty `httpRoute.rules` makes the chart emit `PathPrefix /`. The example sets three Exact rules and a 900 second request timeout. `ingress.enabled` stays false.
+The example sets the same three Exact rules and a 900 second request timeout. `ingress.enabled` stays false. An empty `httpRoute.rules` would fall back to the chart's prefix of `/`, which these values do not use.
 
 ```bash
 helm upgrade --install openai-dial-proxy dial/dial-extension \
@@ -109,12 +115,11 @@ docker buildx imagetools inspect ghcr.io/sergey-zinchenko/openai-dial-proxy:late
 ```json
 {
   "baseUrl": "https://dial.example.com/v1",
-  "apiKey": "<dial-api-key>",
-  "api": "openai-completions"
+  "apiKey": "<dial-api-key>"
 }
 ```
 
-`baseUrl` must be the host plus `/v1`, not the Core `/openai` prefix.
+`baseUrl` is the public host plus `/v1`. Chat goes to `/v1/chat/completions`. If the client has a separate API-type field, choose chat completions.
 
 ## Develop
 
